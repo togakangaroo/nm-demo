@@ -29,30 +29,47 @@ const MultiSelect = ({values, onChange, children}) => {
     return React.createElement(`select`, {multiple: true, value: values, onChange: setValues}, children)
 }
 
+const shortMealDisplay = ({name, portion, calories}) => `${name} (${calories} per ${portion}g)`
+const ShortMealDisplay = shortMealDisplay
+
 const clone = obj => ({...obj})
 const FoodSelector = ({values, onChange}) => {
     const { getFoods } = useApi()
     const [foods] = useLoadedState(getFoods)
     return (
         <When value={foods} render={() =>(
-            <MultiSelect value={values} onChange={ids => foods.filter(f => ids.includes(f.id)).map(clone)}>
+            <MultiSelect valuse={values} onChange={ids => onChange(foods.filter(f => ids.includes(f.id)).map(clone))}>
               {foods.map(f => (
-                  <option key={f.id} value={f.id}>{f.name} ({f.calories}cal)</option>
+                  <option key={f.id} value={f.id}>{shortMealDisplay(f)}</option>
               ))}
             </MultiSelect>
         )}/>
     )
 }
 
+const noop = () => {}
+const MealItemEntry = ({meal, onChange}) => (
+    <form onSubmit={noop}>
+        <header><ShortMealDisplay {...meal.food} /></header>
+      <input placeholder="Portions Eaten" type="number" min={1} value={meal.portionsEaten} onChange={onChange} />
+    </form>
+)
+
 const MealBuilder = () => {
     const [mealItems, setMealItems] = useState([])
     const onMealItemsChange = (foods) => {
-        setMealItems(foods)
+        setMealItems(foods.map(food => ({food})))
     }
+    const onMealEntryChange = (x) => console.log(x)
     return (
         <section>
           <header>Build your meal</header>
-          <FoodSelector value={mealItems.map(x => x.id)} onChange={onMealItemsChange} />
+          <FoodSelector value={mealItems.map(x => x.food.id)} onChange={onMealItemsChange} />
+          <ul>
+            {mealItems.map(x => (
+                <li key={x.food.id}><MealItemEntry meal={x} onChange={onMealEntryChange} /></li>
+            ))}
+          </ul>
         </section>
     )
 }
