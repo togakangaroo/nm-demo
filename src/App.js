@@ -29,15 +29,15 @@ const useLoadedState = (getValue, dependencies=[]) => {
     return [value, setValue]
 }
 
-const MultiSelect = ({values, onChange, children}) => {
+const MultiSelect = ({values, onChange, children, size=20}) => {
     const setValues = ({target}) => {
         onChange([...target.querySelectorAll(`option`)].filter(o => o.selected).map(o => o.value))
     }
-    return React.createElement(`select`, {multiple: true, value: values, onChange: setValues}, children)
+    return React.createElement(`select`, {multiple: true, size, value: values, onChange: setValues}, children)
 }
 
 const shortMealDisplay = ({name, portion, calories}) => `${name} (${calories} per ${portion}g)`
-const ShortMealDisplay = shortMealDisplay
+const ShortMealItemDisplay = shortMealDisplay
 
 const clone = obj => ({...obj})
 const FoodSelector = ({values, onChange}) => {
@@ -54,20 +54,61 @@ const FoodSelector = ({values, onChange}) => {
     )
 }
 
+const Label = styled.div`
+    display: inline-block;
+    &:after {
+        content: ":";
+        margin-right: 0.6em;
+    }
+`
+const Labeled = ({label, children}) =>(
+    <label>
+      <Label>{label}</Label>
+      {children}
+    </label>
+)
+const CaloriesContainer = styled.div`
+    margin: 10px;
+    font-family: monospace;
+    display: inline-block;
+`
+const Calories = ({value}) => (
+    <CaloriesContainer>
+      {value} calories
+    </CaloriesContainer>
+)
+const totalMealItemCalories = ({portionsEaten, food: { calories }}) => portionsEaten*calories
+const TotalMealItemCalories = (x) => (
+    !x.portionsEaten ? null : (
+        <Calories value={totalMealItemCalories(x)} />
+    )
+)
+const sum = (a, b) => a+b
+const TotalMealCalories = ({mealItems}) => (
+    <div>
+      <Calories value={mealItems.map(totalMealItemCalories).reduce(sum, 0)}/>
+      over {mealItems.length} items
+    </div>
+)
+
 const noop = () => {}
-const MealItemEntry = ({meal, onChange}) => {
+const MealItemEntry = ({mealItem, onChange}) => {
     const changePortions = ({target: {value}}) => {
-        onChange({...meal, portionsEaten: +value})
+        onChange({...mealItem, portionsEaten: +value})
     }
     return (
         <form onSubmit={noop}>
           <header>
-            <ShortMealDisplay {...meal.food} />
+            <ShortMealItemDisplay {...mealItem.food} />
           </header>
-          <Input placeholder="Portions Eaten"
-                 type="number" min={1} required
-                 value={meal.portionsEaten}
-                 onChange={changePortions} />
+
+          <Labeled label="Portions Eaten">
+              <Input placeholder="Portions Eaten"
+                     type="number" min={1} required
+                     value={mealItem.portionsEaten}
+                     onChange={changePortions} />
+          </Labeled>
+          <TotalMealItemCalories {...mealItem} />
         </form>
     )
 }
@@ -104,8 +145,8 @@ const replace = ({act, where}) => function * (arr) {
     for(const [x, i] of zip(arr, range()))
         if(where(x, i))
             yield act(x, i)
-        else
-            yield x
+    else
+        yield x
 }
 const arr = x => Array.isArray(x) ? x : [...x]
 const createMeal = food => ({
@@ -135,9 +176,12 @@ const MealBuilder = () => {
           <FoodSelector value={mealItems.map(x => x.food.id)} onChange={onMealItemsChange} />
           <ul>
             {mealItems.map(x => (
-                <li key={x.food.id}><MealItemEntry meal={x} onChange={onMealEntryChange} /></li>
+                <li key={x.food.id}>
+                  <MealItemEntry mealItem={x} onChange={onMealEntryChange} />
+                </li>
             ))}
           </ul>
+          <TotalMealCalories mealItems={mealItems} />
         </section>
     )
 }
