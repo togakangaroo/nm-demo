@@ -17,17 +17,19 @@ export const range = function * (min = 0) {
         val += 1
     }
 }
-export const zip = function * (coll1, coll2) {
-    const it2 = coll2[Symbol.iterator]()
-    for(const item1 of coll1) {
-        const {done, value} = it2.next()
-        if(done)
+export const zip = function * (combineFn, ...collections) {
+    const iterators = collections.map(c => c[Symbol.iterator]())
+    while(true) {
+        const items = iterators.map(it => it.next())
+        if(items.some(i => i.done))
             return
-        yield [item1, value]
+        yield combineFn(...items.map(i => i.value))
     }
 }
+export const zipTuple = (...colls) => zip(Array, ...colls)
+
 export const replace = ({act, where}) => function * (arr) {
-    for(const [x, i] of zip(arr, range()))
+    for(const [x, i] of zipTuple(arr, range()))
         if(where(x, i))
             yield act(x, i)
     else
