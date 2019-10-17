@@ -3,6 +3,7 @@ import {navigate, Link} from '@reach/router'
 import styled from 'styled-components'
 import uuid from 'uuid/v4'
 import {MealBuilder} from './MealBuilder.js'
+import {DateDisplay} from '../ui/DateDisplay.js'
 
 const Footer = styled.footer`
     display: inline-grid;
@@ -51,7 +52,7 @@ export const MealEditor = ({mealId, meals, saveMeal, deleteMeal}) => {
     }
     return (
         <section>
-          <header>Edit Meal from {meal.timestamp}</header>
+          <header>Edit Meal from <DateDisplay value={meal.timestamp} /></header>
           <MealBuilder meal={meal} onChange={setMeal} />
           <Footer>
             <button onClick={() => saveMeal(meal)}>Save Meal</button>
