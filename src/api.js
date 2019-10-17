@@ -1,8 +1,20 @@
 import React, {useContext, useState, useEffect} from 'react'
 import {getFoods} from './food/api.js'
 
+const defaultMyState = {myMeals: []}
+export const getMyState = async () => {
+    try {
+        return JSON.parse(localStorage.getItem(`myMeals`)) || defaultMyState
+    } catch(e) {
+        return defaultMyState
+    }
+}
+export const saveMyState = async (myMeals) => {
+    localStorage.setItem(`myMeals`, JSON.stringify(myMeals))
+}
+
 export const ApiContext = React.createContext({
-    getFoods
+    getFoods, getMyState, saveMyState,
 })
 
 export const useApi = () => useContext(ApiContext)

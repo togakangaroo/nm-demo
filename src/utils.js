@@ -2,7 +2,7 @@ export const match = (items, others, areEqual) => {
     const additional = [...others]
     const removed = []
     for(const i of items) {
-        const idx = additional.findIndex(areEqual(i))
+        const idx = additional.findIndex(x => areEqual(i, x))
         if(idx < 0)
             removed.push(i)
         else
@@ -10,6 +10,7 @@ export const match = (items, others, areEqual) => {
     }
     return {additional, removed}
 }
+
 export const range = function * (min = 0) {
     let val = min;
     while(true) {
@@ -17,6 +18,7 @@ export const range = function * (min = 0) {
         val += 1
     }
 }
+
 export const zip = function * (combineFn, ...collections) {
     const iterators = collections.map(c => c[Symbol.iterator]())
     while(true) {
@@ -27,12 +29,3 @@ export const zip = function * (combineFn, ...collections) {
     }
 }
 export const zipTuple = (...colls) => zip(Array, ...colls)
-
-export const replace = ({act, where}) => function * (arr) {
-    for(const [x, i] of zipTuple(arr, range()))
-        if(where(x, i))
-            yield act(x, i)
-    else
-        yield x
-}
-export const arr = x => Array.isArray(x) ? x : [...x]

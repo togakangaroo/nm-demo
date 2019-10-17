@@ -9,9 +9,9 @@ export const TotalMealItemCalories = (x) => (
 )
 
 const sum = (a, b) => a+b
-export const TotalMealCalories = ({mealItems}) => (
+export const TotalMealCalories = ({items}) => (
     <div>
-      <Calories value={mealItems.map(totalMealItemCalories).reduce(sum, 0)}/>
-      over {mealItems.length} items
+      <Calories value={items.map(totalMealItemCalories).reduce(sum, 0)}/>
+      over {items.length} items
     </div>
 )

@@ -1,43 +1,41 @@
-import React, {useState} from 'react'
-import {match, arr, replace} from '../utils.js'
+import React from 'react'
+import {match} from '../utils.js'
 import {FoodSelector} from '../food/FoodSelector.js'
 import {MealItemEntry} from './MealItemEntry.js'
 import {TotalMealCalories} from './TotalMealCalories.js'
 
-const createMeal = food => ({
+const createMealItem = food => ({
     food,
     portionsEaten: 1,
 })
 
-export const MealBuilder = () => {
-    const [mealItems, setMealItems] = useState([])
+export const MealBuilder = ({meal, onChange}) => {
     const onMealItemsChange = (foods) => {
-        const {additional, removed} = match(mealItems, foods, mi => f => mi.food.id === f.id)
-        const newFoods = mealItems
+        const {additional, removed} = match(meal.items, foods, (mi, f) => mi.food.id === f.id)
+        const items = meal.items
               .filter(mi => !removed.includes(mi))
-              .concat(additional.map(createMeal))
-        setMealItems(newFoods)
+              .concat(additional.map(createMealItem))
+        onChange({...meal, items})
     }
     const onMealEntryChange = (x) => {
-        setMealItems(arr(
-            replace({
-                act: o => ({...o, portionsEaten: x.portionsEaten}),
-                where: (o) => o.food.id === x.food.id
-            })(mealItems)
+        const items = meal.items.map(mi => (
+            mi.food.id !== x.food.id ? mi : {...mi, portionsEaten: x.portionsEaten}
         ))
+        onChange({...meal, items})
     }
     return (
-        <section>
-          <header>Build your meal</header>
-          <FoodSelector value={mealItems.map(x => x.food.id)} onChange={onMealItemsChange} />
+        <form onSubmit={noSubmit}>
+          <FoodSelector value={meal.items.map(x => x.food.id)} onChange={onMealItemsChange} />
           <ul>
-            {mealItems.map(x => (
+            {meal.items.map(x => (
                 <li key={x.food.id}>
                   <MealItemEntry mealItem={x} onChange={onMealEntryChange} />
                 </li>
             ))}
           </ul>
-          <TotalMealCalories mealItems={mealItems} />
-        </section>
+          <TotalMealCalories items={meal.items} />
+        </form>
     )
 }
+
+const noSubmit = e => e.preventDefault()

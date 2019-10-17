@@ -12,11 +12,11 @@ const MultiSelect = ({values, onChange, children, size=20}) => {
 
 const clone = obj => ({...obj})
 
-export const FoodSelector = ({values, onChange}) => {
+export const FoodSelector = ({value, onChange}) => {
     const [foods] = useFromApi(`getFoods`)
     return (
         <When value={foods} render={() =>(
-            <MultiSelect valuse={values} onChange={ids => onChange(foods.filter(f => ids.includes(f.id)).map(clone))}>
+            <MultiSelect values={value} onChange={ids => onChange(foods.filter(f => ids.includes(f.id)).map(clone))}>
             {foods.map(f => (
                 <option key={f.id} value={f.id}>{shortFoodDisplay(f)}</option>
             ))}

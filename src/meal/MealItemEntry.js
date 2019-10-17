@@ -4,13 +4,12 @@ import {Input} from '../ui/Input.js'
 import {ShortFoodDisplay} from '../food/ShortFoodDisplay.js'
 import {TotalMealItemCalories} from './TotalMealCalories.js'
 
-const noop = () => {}
 export const MealItemEntry = ({mealItem, onChange}) => {
     const changePortions = ({target: {value}}) => {
         onChange({...mealItem, portionsEaten: +value})
     }
     return (
-        <form onSubmit={noop}>
+        <section>
           <header>
             <ShortFoodDisplay {...mealItem.food} />
           </header>
@@ -22,6 +21,6 @@ export const MealItemEntry = ({mealItem, onChange}) => {
                      onChange={changePortions} />
           </Labeled>
           <TotalMealItemCalories {...mealItem} />
-        </form>
+        </section>
     )
 }
