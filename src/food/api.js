@@ -1,3 +1,53 @@
-const foods = [{"name":"Avocado","id":"f8c6f5cf-abab-b663-e799-9b578b7c8b53","portion":146,"calories":889},{"name":"Watercress Sandwich","id":"6cc41164-38b2-c59c-2480-80e2710efb1f","portion":502,"calories":468},{"name":"Flan","id":"3b214928-2f27-4879-d795-b95ab31d7265","portion":135,"calories":727},{"name":"Calamari","id":"e62d98b2-8a3d-66f7-fc3c-2e4851c2e450","portion":298,"calories":801},{"name":"Raspberry Lemon Meringue Pie","id":"6f278788-c6e0-43f7-eae6-d1f382eab524","portion":516,"calories":441},{"name":"Baked Potato Soup","id":"069bbeea-24d4-97ca-7364-6f3644953eb8","portion":401,"calories":899},{"name":"Oysters Rockefeller","id":"0374c61c-8fbd-bd70-0b6d-d0720d27a9a6","portion":180,"calories":522},{"name":"Sticky Toffee Pudding","id":"a7d73907-6335-460a-81b5-1db1e450322f","portion":293,"calories":665},{"name":"Chicken Fried Steak","id":"4b6923e9-bfb4-baf4-cec9-799d4a3ab59e","portion":284,"calories":861},{"name":"Cinnamon Bread","id":"6fd81b32-e18e-5553-2b29-145dc2c5a66e","portion":442,"calories":439},{"name":"Maple Bacon Doughnut","id":"525e27a6-0568-6910-baa2-542bffc64def","portion":504,"calories":936},{"name":"Bagel and Lox","id":"cf6e4658-6dd2-fdd3-160c-0c894e46969c","portion":267,"calories":850},{"name":"Persimmon","id":"db7731c1-d3dc-c324-e9f2-436bf904895a","portion":53,"calories":594},{"name":"Eggplant","id":"d95d0178-7189-5d9d-45a4-a16b15e27f7a","portion":102,"calories":262},{"name":"Udon","id":"b64983bd-58ab-a68c-8383-0c0d1eb5cfc3","portion":469,"calories":274},{"name":"Hibiscus Tea","id":"c379e9f7-7178-7570-c4a9-27d81c09f575","portion":539,"calories":506},{"name":"Cactus Fries","id":"dcf006ab-a73f-f5ee-eb2e-21fc2e6dfbc1","portion":485,"calories":433},{"name":"Pomelo","id":"132497ef-ca95-cb3a-9497-a4b4165286bb","portion":507,"calories":1001},{"name":"Jumbalaya","id":"847de75f-660b-5def-c87f-ae733f11c104","portion":219,"calories":880},{"name":"Chicken Noodle Soup","id":"6cd90a17-0cb9-c6af-826f-b71ee4cc1454","portion":65,"calories":678},{"name":"Pho","id":"86b48b68-e141-8632-2fd1-5c2c63fa1488","portion":53,"calories":724},{"name":"Black Forest Cake","id":"dda4b618-627d-f556-095c-829b8be9cc10","portion":205,"calories":460},{"name":"Butter Chicken","id":"16fe11bf-4ed7-d4a6-0e91-fc28d3855334","portion":533,"calories":1048},{"name":"Philly Cheese Steak","id":"90e89cce-ae06-f6c1-3368-babb8f7a5167","portion":172,"calories":368},{"name":"Fettucini Alfredo","id":"47990ddb-5428-3028-82bc-fb4468ee4aca","portion":389,"calories":282},{"name":"Spaghetti Squash","id":"2b271379-c91c-a8b8-d395-bd48c9d8ed70","portion":336,"calories":698},{"name":"Frittata","id":"2d141529-2360-588a-0ff0-881456a819e6","portion":325,"calories":1036},{"name":"Masala Dosa","id":"7440d9a0-80d4-cc38-b747-933dce1bec46","portion":431,"calories":849},{"name":"Eel","id":"7e7f55a3-6913-cbff-0029-944f673f3a6b","portion":259,"calories":576},{"name":"Profiteroles","id":"a1b2a77c-12fe-46c3-f78e-b55f5b25f335","portion":299,"calories":278},{"name":"Escargots","id":"59c5563d-57a4-7fb7-d0fc-ce889a433626","portion":273,"calories":873},{"name":"Cream Cheese Frosting","id":"25bebd9c-0215-9bfa-03a7-9c3c4f181793","portion":477,"calories":886},{"name":"Pineapple","id":"b24f7eae-91c5-5cc5-8da0-dcf0a4644595","portion":78,"calories":1017},{"name":"Zucchini Flowers","id":"66266b4c-dc61-85ff-4a17-a608f97cb37f","portion":515,"calories":885},{"name":"Arugula Blackberry Salad","id":"f5b5f94a-5732-2228-2c2a-3fd187cd0111","portion":483,"calories":683},{"name":"Dragonfruit","id":"41d30414-3e85-5044-fd1f-5e3b31f39b4b","portion":484,"calories":504},{"name":"Carbonara","id":"1d0fb1fb-1770-0dec-8f92-3c4eeed669c2","portion":94,"calories":803},{"name":"Chia Pudding","id":"fa3129a1-7888-ec8c-3f5d-e03cbd2e915a","portion":482,"calories":264},{"name":"Mango Lassi","id":"673aac49-6eb2-1691-7b35-76e96bd548ba","portion":343,"calories":302},{"name":"Corned Beef Sandwich","id":"538de5bd-25cf-9386-7721-c59d3949790a","portion":50,"calories":773}]
+const noop = () => {}
 
-export const getFoods = () => Promise.resolve(foods)
+/*
+  A form of debounce specific to api promises. This is a bit better then the
+  type of debounce you see implemented in eg lodash first because putting
+  milliseconds first just makes more sense, second because its specific to
+  promises meaning it does both a leading and trailing edge debounce but then
+  also when it is debouncing it is returning unresolved promises (not resolved
+  to the last value!). When we eventually *do* get a completed promise, all of
+  those become resolved or rejected
+*/
+const debouncePromise = (ms, getVal) => {
+    let nextInvoke
+    let timeout
+    const awaiting = []
+
+    const finish = resOrRej => async (val) => {
+        for(const x of awaiting)
+            x[resOrRej](val)
+        awaiting.splice(0)
+        return val
+    }
+    const getAndResolveAll = (...args) => (
+        getVal(...args).then(finish(`resolve`), finish(`reject`))
+    )
+    const resetTimeout = (onTimeout = noop) => {
+        clearTimeout(timeout)
+        timeout = setTimeout(() => {
+            nextInvoke = notDebouncing
+            onTimeout()
+        }, ms)
+    }
+    // states:
+    const debouncing = (...args) => {
+        resetTimeout(() => getAndResolveAll(...args)) //the lambda is the trailing edge debounce
+        return new Promise((resolve, reject) => awaiting.push({resolve, reject}))
+    }
+    const notDebouncing = (...args) => {
+        awaiting.splice(0)
+        nextInvoke = debouncing
+        resetTimeout()
+        return getAndResolveAll(...args)
+    }
+
+    nextInvoke = notDebouncing //leading edge debounce
+    return (...args) => nextInvoke(...args)
+}
+
+const searchFoods = debouncePromise(2500, (search) => (
+    fetch(`https://uih0b7slze.execute-api.us-east-1.amazonaws.com/dev/search?kv=${search}`).then(x => x.json())
+))
+
+export const getFoods = (search) => ((search||``).length < 3) ? Promise.resolve([]) : searchFoods(search)

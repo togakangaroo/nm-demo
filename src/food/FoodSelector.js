@@ -1,26 +1,43 @@
-import React from 'react'
+import React, {useState} from 'react'
+import styled from 'styled-components'
 import {When} from '../ui/When.js'
-import {useFromApi} from '../api.js'
-import {shortFoodDisplay} from '../food/ShortFoodDisplay.js'
+import {Input} from '../ui/Input.js'
+import {useApi, useLoadedState} from '../api.js'
+import {ShortFoodDisplay} from '../food/ShortFoodDisplay.js'
 
-const MultiSelect = ({values, onChange, children, size=20}) => {
-    const setValues = ({target}) => {
-        onChange([...target.querySelectorAll(`option`)].filter(o => o.selected).map(o => o.value))
-    }
-    return React.createElement(`select`, {multiple: true, size, value: values, onChange: setValues}, children)
-}
+const PlainButton = styled.button`
+    display: inline-block;
+    background-color: transparent;
+    margin: 0;
+    padding: 0;
+    border: 0;
+`
 
-const clone = obj => ({...obj})
+const Section = styled.section`
+    display: inline-flex;
+    flex-direction: column;
+    align-items: flex-end;
+    margin: 10px;
+`
 
-export const FoodSelector = ({value, onChange}) => {
-    const [foods] = useFromApi(`getFoods`)
+export const FoodSelector = ({onAdd}) => {
+    const [search, setSearch] = useState(``)
+    const {getFoods} = useApi()
+    const [foods] = useLoadedState(() => getFoods(search), [search, getFoods])
     return (
-        <When value={foods} render={() =>(
-            <MultiSelect values={value} onChange={ids => onChange(foods.filter(f => ids.includes(f.id)).map(clone))}>
-            {foods.map(f => (
-                <option key={f.id} value={f.id}>{shortFoodDisplay(f)}</option>
-            ))}
-            </MultiSelect>
-        )}/>
+        <Section>
+          <Input placeholder="Search..." value={search} onChange={e => setSearch(e.target.value)} />
+          <When value={foods} render={() =>(
+              <ul>
+                {foods.map(f => (
+                    <li key={f.id}>
+                      <PlainButton onClick={() => onAdd(f)}>
+                        <ShortFoodDisplay {...f} />
+                      </PlainButton>
+                    </li>
+                ))}
+              </ul>
+          )}/>
+        </Section>
     )
 }

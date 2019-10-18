@@ -1,5 +1,4 @@
 import React from 'react'
-import {match} from '../utils.js'
 import {FoodSelector} from '../food/FoodSelector.js'
 import {MealItemEntry} from './MealItemEntry.js'
 import {TotalMealCalories} from './TotalMealCalories.js'
@@ -10,11 +9,10 @@ const createMealItem = food => ({
 })
 
 export const MealBuilder = ({meal, onChange}) => {
-    const onMealItemsChange = (foods) => {
-        const {additional, removed} = match(meal.items, foods, (mi, f) => mi.food.id === f.id)
-        const items = meal.items
-              .filter(mi => !removed.includes(mi))
-              .concat(additional.map(createMealItem))
+    const onMealItemAdded = (food) => {
+        if(meal.items.some(i => i.food.id === food.id))
+            return
+        const items = meal.items.concat(createMealItem(food))
         onChange({...meal, items})
     }
     const onMealEntryChange = (x) => {
@@ -25,7 +23,7 @@ export const MealBuilder = ({meal, onChange}) => {
     }
     return (
         <form onSubmit={noSubmit}>
-          <FoodSelector value={meal.items.map(x => x.food.id)} onChange={onMealItemsChange} />
+          <FoodSelector onAdd={onMealItemAdded} />
           <ul>
             {meal.items.map(x => (
                 <li key={x.food.id}>
