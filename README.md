@@ -8,6 +8,8 @@ For the fastest way to run this you'll need [Docker](https://www.docker.com) ins
 
 Will launch the docker container and run the application on [http://localhost:3000](http://localhost:3000).
 
+After that you can `docker stop nm-demo` and `docker start nm-demo` at will.
+
 You should also be able to `npm install` and `npm start` if you don't want to deal with Docker, but I haven't tested that and it makes some assumptions about what version of node you'd be running.https://www.docker.com
 
 
